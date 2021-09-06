@@ -16,7 +16,8 @@ class ImagemView(View):
         rota = request.POST['site']
         post = ImagensModel.objects.all()
 
-        page = requests.get(rota)
+        headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Mobile Safari/537.36 Edg/93.0.961.38'}
+        page = requests.get(rota, headers=headers)
         soup = BeautifulSoup(page.content, 'html.parser')
         images = soup.find_all('img')
         images_figure = soup.find_all('figure')
