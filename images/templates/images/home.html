@@ -1,13 +1,25 @@
 {% load static %}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+</head>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 <body class="bg-dark">
-<div class="bg-dark m-0 p-0">
-    <h2 class="text-center text-white border-bottom p-2"><small>{{msg}}</small></h2>
+<div class="container-fluid">
+    <p class="text-center text-white msg"><strong>{{msg}}</strong></p>
+</div>
+
+<div class="bg-dark m-0 p-0 mt-4">
     <form action="" class="m-0 p-0" method="post">
         {% csrf_token %}
-        <input type="text" class="form-control col-10" name="site" placeholder="www.example.com" required>
+        <input type="text" class="form-control" name="site" placeholder="www.example.com" required>
         <div class="d-grid gap-2">
             <button class="btn btn-success btn-lg btn-block" type="submit">Search</button>
         </div>
@@ -22,10 +34,10 @@
 
 <p class="text-center text-white m-0 p-2">{{site_status}}</p>
 
-<div class="container-fluid row bg-dark m-0 p-3">
+<div class="container-fluid row bg-dark m-0 p-0">
     {% for x, y in img_total %}
     {% if x %}
-    <div class="card mb-2 mt-2 col-md-2 p-2 hov img-back  bg-dark">
+    <div class="card mb-2 mt-2 col-lg-2 p-0 m-0 bg-dark">
         <a href="{{ x }}" class="text-white" target="_blank" style="text-decoration: none">
             <div class="embed-responsive embed-responsive-4by3" >
                 <img class="card-img-top embed-responsive-item imagens_down" src="{{ x }}" style="object-fit:cover"/>
@@ -41,15 +53,21 @@
 
 <style>
     .hov:hover{transition:.3s;transform:scale(1.03);opacity:90%}
-    @media only screen and (max-width: 740px) {
+    @media only screen and (max-width: 992px) {
         .imagens_down {
-            height: 250px;
+            height: 280px;
+        }
+        .msg {
+            font-size: 15px;
         }
     }
 
-    @media only screen and (min-width: 740px) {
+    @media only screen and (min-width: 992px) {
         .imagens_down {
             height: 120px;
+        }
+        .msg {
+            font-size: 25px;
         }
     }
 </style>
