@@ -21,40 +21,66 @@ class ImagemView(View):
         soup = BeautifulSoup(page.content, 'html.parser')
         images = soup.find_all('img')
         images_figure = soup.find_all('figure')
+        images_ul = soup.find_all('li')
 
         lista_imagens = []
         lista_imagens_names = []
 
-        try:
-            for i in images_figure:
+        for i in images_ul:
+            print(i.img)
+            try:
                 data = 'src'
                 if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
                     data = 'src'
                 else:
                     data = 'data-orig-file'
-                if i.img:
-                    print(str(i.img[data]))
-                    if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
-                        if i.img[data] not in lista_imagens:
-                            lista_imagens.append(i.img[data])
+                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
+                    if i.img[data] not in lista_imagens:
+                        lista_imagens.append(i.img[data])
 
-                        url = i.img[data]
-                        filename = url.split('/')[-1]
-                        r = requests.get(url, allow_redirects=True)
-                        save_path = os.path.abspath("media/all_images")
-                        complete = os.path.join(save_path, filename)
+                    url = i.img[data]
+                    filename = url.split('/')[-1]
+                    r = requests.get(url, allow_redirects=True)
+                    save_path = os.path.abspath("media/all_images")
+                    complete = os.path.join(save_path, filename)
 
-                        try:
-                            open(complete, 'wb').write(r.content)
-                        except Exception as erro:
-                            print(erro)
-                        if f'/media/all_images/{filename}' not in lista_imagens_names:
-                            lista_imagens_names.append(f'/media/all_images/{filename}')
-        except Exception as erro:
-            print(erro)
+                    try:
+                        open(complete, 'wb').write(r.content)
+                    except Exception as erro:
+                        print(erro)
+                    if f'/media/all_images/{filename}' not in lista_imagens_names:
+                        lista_imagens_names.append(f'/media/all_images/{filename}')
+            except Exception as erro:
+                print(erro)
 
-        try:
-            for i in images:
+        for i in images_figure:
+            try:
+                data = 'src'
+                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
+                    data = 'src'
+                else:
+                    data = 'data-orig-file'
+                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
+                    if i.img[data] not in lista_imagens:
+                        lista_imagens.append(i.img[data])
+
+                    url = i.img[data]
+                    filename = url.split('/')[-1]
+                    r = requests.get(url, allow_redirects=True)
+                    save_path = os.path.abspath("media/all_images")
+                    complete = os.path.join(save_path, filename)
+
+                    try:
+                        open(complete, 'wb').write(r.content)
+                    except Exception as erro:
+                        print(erro)
+                    if f'/media/all_images/{filename}' not in lista_imagens_names:
+                        lista_imagens_names.append(f'/media/all_images/{filename}')
+            except Exception as erro:
+                print(erro)
+
+        for i in images:
+            try:
                 data = 'src'
                 if str(i.get(data))[-4:] != '.svg' and '.' in str(i.get(data))[-4:]:
                     data = 'src'
@@ -78,8 +104,8 @@ class ImagemView(View):
 
                         if f'/media/all_images/{filename}' not in lista_imagens_names:
                             lista_imagens_names.append(f'/media/all_images/{filename}')
-        except Exception as erro:
-            print(erro)
+            except Exception as erro:
+                print(erro)
 
         try:
             with zipfile.ZipFile(f'{os.path.abspath("media/all_images")}/all_images.zip', 'w') as zipF:
@@ -89,7 +115,6 @@ class ImagemView(View):
         except Exception as erro:
             print(erro)
 
-        print(lista_imagens_names)
         msg = f'{len(lista_imagens)} Imagens encontradas em {rota}'
         imagens_total = zip(lista_imagens, lista_imagens_names)
         context = {
