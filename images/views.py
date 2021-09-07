@@ -27,98 +27,52 @@ class ImagemView(View):
 
         for header in list_headers:
             page = requests.get(rota, headers=header, proxies=proxies)
-            print(page.request.headers)
             if '200' in str(page):
                 page = requests.get(rota, headers=header, proxies=proxies)
                 break
+            else:
+                continue
 
         soup = BeautifulSoup(page.content, 'html.parser')
-        images = soup.find_all('img')
-        images_figure = soup.find_all('figure')
-        images_ul = soup.find_all('li')
+        images = soup.findAll('img')
 
         lista_imagens = []
         lista_imagens_names = []
 
-        for i in images_ul:
-            try:
-                data = 'src'
-                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
-                    data = 'src'
-                else:
-                    data = 'data-orig-file'
-                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
-                    if i.img[data] not in lista_imagens:
-                        lista_imagens.append(i.img[data])
-
-                    url = i.img[data]
-                    filename = url.split('/')[-1]
-                    r = requests.get(url, allow_redirects=True)
-                    save_path = os.path.abspath("media/all_images")
-                    complete = os.path.join(save_path, filename)
-
-                    try:
-                        open(complete, 'wb').write(r.content)
-                    except Exception as erro:
-                        print(erro)
-                    if f'/media/all_images/{filename}' not in lista_imagens_names:
-                        lista_imagens_names.append(f'/media/all_images/{filename}')
-            except Exception as erro:
-                print(erro)
-
-        for i in images_figure:
-            try:
-                data = 'src'
-                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
-                    data = 'src'
-                else:
-                    data = 'data-orig-file'
-                if i.img[data][-4:] != '.svg' and '.' in i.img[data][-4:]:
-                    if i.img[data] not in lista_imagens:
-                        lista_imagens.append(i.img[data])
-
-                    url = i.img[data]
-                    filename = url.split('/')[-1]
-                    r = requests.get(url, allow_redirects=True)
-                    save_path = os.path.abspath("media/all_images")
-                    complete = os.path.join(save_path, filename)
-
-                    try:
-                        open(complete, 'wb').write(r.content)
-                    except Exception as erro:
-                        print(erro)
-                    if f'/media/all_images/{filename}' not in lista_imagens_names:
-                        lista_imagens_names.append(f'/media/all_images/{filename}')
-            except Exception as erro:
-                print(erro)
-
         for i in images:
-            try:
-                data = 'src'
-                if str(i.get(data))[-4:] != '.svg' and '.' in str(i.get(data))[-4:]:
+            data = ''
+            if i:
+                print(i)
+                if 'http' in str(i.get('src')):
+                    print(i.get('src'))
                     data = 'src'
+                elif 'http' in str(i.get('data-path')):
+                    print(i.get('data-path'))
+                    data = 'data-path'
+                elif 'http' in str(i.get('data-cfsrc')):
+                    print(i.get('data-cfsrc'))
+                    data = 'data-cfsrc'
+                elif 'http' in str(i.get('data-origin')):
+                    print(i.get('data-origin'))
+                    data = 'data-origin'
                 else:
-                    data = 'data-orig-file'
-                if i.get(data):
-                    if str(i.get(data))[-4:] != '.svg' and '.' in str(i.get(data))[-4:]:
-                        if i.get(data) not in lista_imagens:
-                            lista_imagens.append(i.get(data))
+                    continue
+                if str(i.get(data)) not in lista_imagens:
+                    lista_imagens.append(i.get(data))
 
-                        url = str(i.get(data))
-                        filename = url.split('/')[-1]
-                        r = requests.get(url, allow_redirects=True)
-                        save_path = os.path.abspath("media/all_images")
-                        complete = os.path.join(save_path, filename)
+                url = str(i.get(data))
+                filename = url.split('/')[-1]
+                r = requests.get(url, allow_redirects=True)
+                save_path = os.path.abspath("media/all_images")
+                complete = os.path.join(save_path, filename)
 
-                        try:
-                            open(complete, 'wb').write(r.content)
-                        except Exception as erro:
-                            print(erro)
+                try:
+                    open(complete, 'wb').write(r.content)
+                except Exception as erro:
+                    print(erro)
 
-                        if f'/media/all_images/{filename}' not in lista_imagens_names:
-                            lista_imagens_names.append(f'/media/all_images/{filename}')
-            except Exception as erro:
-                print(erro)
+                if f'/media/all_images/{filename}' not in lista_imagens_names:
+                    lista_imagens_names.append(f'/media/all_images/{filename}')
 
         try:
             with zipfile.ZipFile(f'{os.path.abspath("media/all_images")}/all_images.zip', 'w') as zipF:
