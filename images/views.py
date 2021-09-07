@@ -26,10 +26,10 @@ class ImagemView(View):
         page = requests.get(rota, headers=headers, proxies=proxies)
 
         for header in list_headers:
-            page = requests.get(rota, headers=header)
+            page = requests.get(rota, headers=header, proxies=proxies)
             print(page.request.headers)
             if '200' in str(page):
-                page = requests.get(rota, headers=header)
+                page = requests.get(rota, headers=header, proxies=proxies)
                 break
 
         soup = BeautifulSoup(page.content, 'html.parser')
