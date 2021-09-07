@@ -23,12 +23,12 @@ class ImagemView(View):
 
         list_headers = [headers, headers2, headers3, headers4]
         proxies = {'https://': '45.70.195.77:5678'}
-        page = requests.get(rota, headers=headers, proxies=proxies)
+        page = requests.get(rota, headers=headers)
 
         for header in list_headers:
-            page = requests.get(rota, headers=header, proxies=proxies)
+            page = requests.get(rota, headers=header)
             if '200' in str(page):
-                page = requests.get(rota, headers=header, proxies=proxies)
+                page = requests.get(rota)
                 break
             else:
                 continue
