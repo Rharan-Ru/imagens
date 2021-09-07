@@ -22,12 +22,14 @@ class ImagemView(View):
         headers4 = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
         list_headers = [headers, headers2, headers3, headers4]
         page = requests.get(rota, headers=headers)
+
         for header in list_headers:
             page = requests.get(rota, headers=header)
+            print(page.request.headers)
             if '200' in str(page):
                 page = requests.get(rota, headers=header)
-            else:
-                pass
+                break
+
         soup = BeautifulSoup(page.content, 'html.parser')
         images = soup.find_all('img')
         images_figure = soup.find_all('figure')
