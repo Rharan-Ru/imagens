@@ -6,50 +6,64 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Hello, world!</title>
 </head>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 <body class="bg-dark">
-<div class="container-fluid">
-    <p class="text-center text-white msg"><strong>{{msg}}</strong></p>
+
+<div class="container-fluid m-0 p-0">
+    <p class="text-center text-white msg p-0 m-0"><strong>{{msg}}</strong></p>
 </div>
 
-<div class="bg-dark m-0 p-0 mt-4">
+<div class="bg-dark m-0 p-0">
     <form action="" class="m-0 p-0" method="post">
         {% csrf_token %}
         <input type="text" class="form-control" name="site" placeholder="www.example.com" required>
-        <div class="d-grid gap-2">
-            <button class="btn btn-success btn-lg btn-block" type="submit">Search</button>
+        <div class="row m-0 p-0">
+            <button class="btn btn-success col-6" type="submit">Search</button>
+            {% if img_total %}
+            <a class="btn btn-primary col-6" href="{{tudo}}" download>Download All</a>
+            {% endif %}
         </div>
     </form>
 </div>
 
-{% if img_total %}
-<div class="d-grid gap-2 p-0 m-0">
-    <a class="btn btn-primary btn-lg btn-block" href="{{tudo}}" download>Download All</a>
-</div>
-{% endif %}
-
-<p class="text-center text-white m-0 p-2">{{site_status}}</p>
-
-<div class="container-fluid row bg-dark m-0 p-3">
-    {% for x, y in img_total %}
-    {% if x %}
-    <div class="card mb-2 mt-2 col-lg-2 p-0 m-0 bg-dark">
-        <a href="{{ x }}" class="text-white" target="_blank" style="text-decoration: none">
+<div class="container-fluid m-0 p-0 bg-dark">
+    <div class="p-0 m-0 card bg-dark text-white row" style="height:25vh; overflow-x: auto;background-image: url({% static 'steven_bg08.gif' %});background-size:cover;background-position:center;scroll-behavior: smooth">
+        {% for x, y in img_total %}
+        {% if x %}
+        <div class="card mb-2 mt-2 p-0 m-0 bg-dark" style="width:100px;height:15vh;">
             <div class="embed-responsive embed-responsive-4by3" >
-                <img class="card-img-top embed-responsive-item imagens_down hov" src="{{ x }}" style="object-fit:cover"/>
+                <img class="card-img-top embed-responsive-item imagens_down hov" onclick="muda(this.src)" src="{{ x }}" style="object-fit:cover;height:15vh"/>
             </div>
             <div class="card-block d-grid gap-2">
-                <a class="btn btn-primary text-white btn-lg" href="{{y}}" download>Get Image</a>
+                <a class="btn btn-primary text-white" style="font-size:13px;" href="{{y}}" download>Get Image</a>
             </div>
-        </a>
+        </div>
+        {% endif %}
+        {% endfor %}
     </div>
-    {% endif %}
-    {% endfor %}
 </div>
+
+<div class="container-fluid row bg-dark m-0 p-0">
+    <div class="p-2 m-0 card bg-dark text-white" style="max-height:100vh">
+        <div class="embed-responsive mx-auto m-0 p-0" style="max-height:100vh">
+            <a href="" target="_blank" style="text-decoration:none" class="m-0 p-0" id="img-link">
+                <img class="embed-responsive-item img-fluid m-0 p-0" id="img-full" src="{% static '03.jpg' %}" style="max-height:100vh" alt="">
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function muda(src) {
+        console.log(src);
+        document.getElementById("img-full").src = src
+        document.getElementById("img-link").href = src
+    }
+</script>
 
 <style>
     .hov:hover{transition:.3s;transform: scale(1.03);opacity:90%}

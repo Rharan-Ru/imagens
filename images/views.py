@@ -34,6 +34,7 @@ class ImagemView(View):
                 continue
 
         soup = BeautifulSoup(page.content, 'html.parser')
+        sounds = soup.findAll('')
         images = soup.findAll('img')
 
         lista_imagens = []
@@ -41,26 +42,29 @@ class ImagemView(View):
 
         for i in images:
             data = ''
+            url = ''
             if i:
-                print(i)
                 if 'http' in str(i.get('src')):
-                    print(i.get('src'))
                     data = 'src'
+                    url = str(i.get(data))
                 elif 'http' in str(i.get('data-path')):
-                    print(i.get('data-path'))
                     data = 'data-path'
+                    url = str(i.get(data))
                 elif 'http' in str(i.get('data-cfsrc')):
-                    print(i.get('data-cfsrc'))
                     data = 'data-cfsrc'
+                    url = str(i.get(data))
                 elif 'http' in str(i.get('data-origin')):
-                    print(i.get('data-origin'))
                     data = 'data-origin'
+                    url = str(i.get(data))
                 else:
-                    continue
+                    try:
+                        data = 'src'
+                        url = 'http:' + str(i.get(data))
+                    except Exception:
+                        continue
                 if str(i.get(data)) not in lista_imagens:
                     lista_imagens.append(i.get(data))
 
-                url = str(i.get(data))
                 filename = url.split('/')[-1]
                 r = requests.get(url, allow_redirects=True)
                 save_path = os.path.abspath("media/all_images")
