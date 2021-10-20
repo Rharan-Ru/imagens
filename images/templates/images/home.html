@@ -5,85 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Hello, world!</title>
 </head>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 <body class="bg-dark">
-
 <div class="container-fluid m-0 p-0">
-    <p class="text-center text-white msg p-0 m-0"><strong>{{msg}}</strong></p>
+    <p class="text-center text-white msg p-3 m-0"><strong>{{msg}}</strong></p>
 </div>
 
+
 <div class="bg-dark m-0 p-0">
-    <form action="" class="m-0 p-0" method="post">
+    <form action="" class="m-0 p-0" method="post" onsubmit="desativa()">
         {% csrf_token %}
         <input type="text" class="form-control" name="site" placeholder="www.example.com" required>
-        <div class="row m-0 p-0">
-            <button class="btn btn-success col-6" type="submit">Search</button>
+        <div class="row m-0 p-0 mt-2 mb-2">
+            <button class="desativando btn btn-outline-success col-6 p-2" type="submit">Search</button>
             {% if img_total %}
-            <a class="btn btn-primary col-6" href="{{tudo}}" download>Download All</a>
+            <a class="btn btn-outline-primary col-6 p-2" href="{{tudo}}" download>Download All</a>
             {% endif %}
         </div>
     </form>
+    <p class="carregando text-center text-white p-1" style="display:none">Carregando imagens...</p>
 </div>
 
-<div class="container-fluid m-0 p-0 bg-dark">
-    <div class="p-0 m-0 card bg-dark text-white row" style="height:25vh; overflow-x: auto;background-image: url({% static 'steven_bg08.gif' %});background-size:cover;background-position:center;scroll-behavior: smooth">
+
+<div class="container-fluid m-0 p-0">
+    <div class="row m-0 p-0 imagens-row">
         {% for x, y in img_total %}
-        {% if x %}
-        <div class="card mb-2 mt-2 p-0 m-0 bg-dark" style="width:100px;height:15vh;">
-            <div class="embed-responsive embed-responsive-4by3" >
-                <img class="card-img-top embed-responsive-item imagens_down hov" onclick="muda(this.src)" src="{{ x }}" style="object-fit:cover;height:15vh"/>
-            </div>
-            <div class="card-block d-grid gap-2">
-                <a class="btn btn-primary text-white" style="font-size:13px;" href="{{y}}" download>Get Image</a>
+        <div class="col-md-3 m-0 p-1">
+            <div class="hover hover-3 text-white rounded"><img src="{{x}}" alt="">
+                <div class="hover-overlay"></div>
+                <div class="hover-3-content px-5 py-4">
+                    <a class="thumbnail m-0 p-0 text-white" style="text-decoration:none" href="#" data-image-id="" data-toggle="modal" data-image="{{x}}"
+                       data-target="#image-gallery">
+                        <button class="hover-3-description btn btn-outline-success" style="width:150px">See</button>
+                    </a>
+                    <a class="hover-3-description btn btn-outline-primary" style="width:150px" href="{{y}}" download>Download</a>
+                </div>
             </div>
         </div>
-        {% endif %}
         {% endfor %}
     </div>
 </div>
 
-<div class="container-fluid row bg-dark m-0 p-0">
-    <div class="p-2 m-0 card bg-dark text-white" style="max-height:100vh">
-        <div class="embed-responsive mx-auto m-0 p-0" style="max-height:100vh">
-            <a href="" target="_blank" style="text-decoration:none" class="m-0 p-0" id="img-link">
-                <img class="embed-responsive-item img-fluid m-0 p-0" id="img-full" src="{% static '03.jpg' %}" style="max-height:100vh" alt="">
-            </a>
+<div class="modal fade" id="image-gallery" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header m-0 p-2" style="border:none">
+                <h4 class="modal-title" id="image-gallery-title"></h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body p-0 m-0" style="min-height:80vh;">
+                <img id="image-gallery-image" class="img-responsive col-md-12" src="">
+            </div>
+            <div class="modal-footer row m-0 p-2" style="border:none">
+                <div class="col-6 m-0 p-0">
+                    <button type="button" class="m-0 p-2 btn btn-outline-secondary" style="width:200px" id="show-previous-image">
+                        <i class="bi bi-arrow-left-circle-fill"></i>
+                    </button>
+                </div>
+
+                <div class="col-6 m-0 p-0">
+                    <button type="button" class="m-0 p-2 btn btn-outline-secondary float-right" style="width:200px" id="show-next-image">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 <script>
-    function muda(src) {
-        console.log(src);
-        document.getElementById("img-full").src = src
-        document.getElementById("img-link").href = src
+function desativa() {
+    $('.desativando').prop("disabled", true);
+    $('.carregando').css({'display':'block'})
+}
+
+let modalId = $('#image-gallery');
+
+$(document)
+  .ready(function () {
+
+    loadGallery(true, 'a.thumbnail');
+
+    //This function disables buttons when needed
+    function disableButtons(counter_max, counter_current) {
+      $('#show-previous-image, #show-next-image')
+        .show();
+      if (counter_max === counter_current) {
+        $('#show-next-image')
+          .hide();
+      } else if (counter_current === 1) {
+        $('#show-previous-image')
+          .hide();
+      }
     }
+
+    /**
+     *
+     * @param setIDs        Sets IDs when DOM is loaded. If using a PHP counter, set to false.
+     * @param setClickAttr  Sets the attribute for the click handler.
+     */
+
+    function loadGallery(setIDs, setClickAttr) {
+      let current_image,
+        selector,
+        counter = 0;
+
+      $('#show-next-image, #show-previous-image')
+        .click(function () {
+          if ($(this)
+            .attr('id') === 'show-previous-image') {
+            current_image--;
+          } else {
+            current_image++;
+          }
+
+          selector = $('[data-image-id="' + current_image + '"]');
+          updateGallery(selector);
+        });
+
+      function updateGallery(selector) {
+        let $sel = selector;
+        current_image = $sel.data('image-id');
+        $('#image-gallery-title')
+          .text($sel.data('title'));
+        $('#image-gallery-image')
+          .attr('src', $sel.data('image'));
+        disableButtons(counter, $sel.data('image-id'));
+      }
+
+      if (setIDs == true) {
+        $('[data-image-id]')
+          .each(function () {
+            counter++;
+            $(this)
+              .attr('data-image-id', counter);
+          });
+      }
+      $(setClickAttr)
+        .on('click', function () {
+          updateGallery($(this));
+        });
+    }
+  });
+
+// build key actions
+$(document)
+  .keydown(function (e) {
+    switch (e.which) {
+      case 37: // left
+        if ((modalId.data('bs.modal') || {})._isShown && $('#show-previous-image').is(":visible")) {
+          $('#show-previous-image')
+            .click();
+        }
+        break;
+
+      case 39: // right
+        if ((modalId.data('bs.modal') || {})._isShown && $('#show-next-image').is(":visible")) {
+          $('#show-next-image')
+            .click();
+        }
+        break;
+
+      default:
+        return; // exit this handler for other keys
+    }
+    e.preventDefault(); // prevent the default action (scroll / move caret)
+  });
+
 </script>
-
-<style>
-    .hov:hover{transition:.3s;transform: scale(1.03);opacity:90%}
-    @media only screen and (max-width: 992px) {
-        .imagens_down {
-            height: 280px;
-        }
-        .msg {
-            font-size: 15px;
-        }
-    }
-
-    @media only screen and (min-width: 992px) {
-        .imagens_down {
-            height: 120px;
-        }
-        .msg {
-            font-size: 25px;
-        }
-    }
-</style>
 
 </body>
