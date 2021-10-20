@@ -60,6 +60,7 @@ class ImagemView(View):
                     continue
                 save_path = os.path.abspath("media/all_images")
                 complete = os.path.join(save_path, filename)
+
                 num_jpg = complete.find('jpg')
                 num_png = complete.find('png')
                 num_gif = complete.find('gif')
@@ -83,13 +84,27 @@ class ImagemView(View):
                 if f'/media/all_images/{filename}' not in lista_imagens_names:
                     lista_imagens_names.append(f'/media/all_images/{filename}')
 
-        try:
-            with zipfile.ZipFile(f'{os.path.abspath("media/all_images")}/all_images.zip', 'w') as zipF:
-                for file in lista_imagens:
+        with zipfile.ZipFile(f'{os.path.abspath("media/all_images")}/all_images.zip', 'w') as zipF:
+            for file in lista_imagens:
+                num_jpg = file.find('jpg')
+                num_png = file.find('png')
+                num_gif = file.find('gif')
+                num_svg = file.find('svg')
+                if num_png != -1:
+                    file = file[0: num_png + 3]
+                elif num_jpg != -1:
+                    file = file[0: num_jpg + 3]
+                elif num_gif != -1:
+                    file = file[0: num_gif + 3]
+                elif num_svg != -1:
+                    file = file[0: num_svg + 3]
+                print(file)
+                try:
                     zipF.write(f"media/all_images/{file.split('/')[-1]}", compress_type=zipfile.ZIP_DEFLATED)
-                zipF.close()
-        except Exception as erro:
-            print(erro)
+                except Exception as erro:
+                    print(erro)
+                    continue
+            zipF.close()
 
         msg = f'{len(lista_imagens)} Imagens encontradas em {rota}'
         imagens_total = zip(lista_imagens, lista_imagens_names)
