@@ -1,12 +1,38 @@
-from django.shortcuts import render, redirect
-from django.views import View
-from .models import ImagensModel
-from bs4 import BeautifulSoup
+import re
 import requests
 import os
-from django.conf import settings
-import json
 import zipfile
+from urllib.request import urlopen
+from urllib.error import HTTPError
+
+from django.shortcuts import render
+from django.views import View
+
+from bs4 import BeautifulSoup
+
+
+def get_all_images(url):
+    """
+    Utilty function used to get a Beautiful Soup object from a given URL
+    """
+    list_images = []
+    session = requests.Session()
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+    try:
+        req = session.get(url, headers=headers)
+    except requests.exceptions.RequestException:
+        return None
+    try:
+        bs = BeautifulSoup(req.text, 'html.parser')
+        images = bs.findAll('img', {'src': re.compile('(jpg|png|gif|svg|ico)$')})
+        for img in images:
+            list_images.append(img['src'])
+    except AttributeError as error:
+        print('Erro de atributo')
+        return None
+    return list_images
 
 
 class ImagemView(View):
@@ -14,104 +40,45 @@ class ImagemView(View):
         return render(request, 'images/home.html')
 
     def post(self, request, *args, **kwargs):
-        rota = request.POST['site']
+        url = request.POST['site']
+        image_list = get_all_images(url)
 
-        headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko)'
-                                 ' Chrome/93.0.4577.63 Mobile Safari/537.36 Edg/93.0.961.38'}
-
-        page = requests.get(rota, headers=headers)
-
-        soup = BeautifulSoup(page.content, 'html.parser')
-        images = soup.findAll('img')
-
-        lista_imagens = []
         lista_imagens_names = []
 
-        for i in images:
-            data = ''
-            url = ''
-            if i:
-                if 'http' in str(i.get('src')):
-                    data = 'src'
-                    url = str(i.get(data))
-                elif 'http' in str(i.get('data-path')):
-                    data = 'data-path'
-                    url = str(i.get(data))
-                elif 'http' in str(i.get('data-cfsrc')):
-                    data = 'data-cfsrc'
-                    url = str(i.get(data))
-                elif 'http' in str(i.get('data-origin')):
-                    data = 'data-origin'
-                    url = str(i.get(data))
-                else:
-                    try:
-                        data = 'src'
-                        url = 'http:' + str(i.get(data))
-                    except Exception:
-                        continue
-                if str(i.get(data)) not in lista_imagens:
-                    lista_imagens.append(i.get(data))
+        for i in image_list:
+            filename = i.split('/')[-1]
+            save_path = os.path.abspath("media/all_images")
+            complete = os.path.join(save_path, filename)
+            try:
+                r = requests.get(i, allow_redirects=False)
+            except Exception as erro:
+                print(erro)
+                continue
 
-                filename = url.split('/')[-1]
-                try:
-                    r = requests.get(url, allow_redirects=True)
-                except Exception as erro:
-                    print(erro)
-                    continue
-                save_path = os.path.abspath("media/all_images")
-                complete = os.path.join(save_path, filename)
+            try:
+                print(filename)
+                open(complete, 'wb').write(r.content)
+            except Exception as erro:
+                print(erro)
 
-                num_jpg = complete.find('jpg')
-                num_png = complete.find('png')
-                num_gif = complete.find('gif')
-                num_svg = complete.find('svg')
-                complete_all = ''
-                if num_png != -1:
-                    complete_all = complete[0: num_png + 3]
-                elif num_jpg != -1:
-                    complete_all = complete[0: num_jpg + 3]
-                elif num_gif != -1:
-                    complete_all = complete[0: num_gif + 3]
-                elif num_svg != -1:
-                    complete_all = complete[0: num_svg + 3]
-                else:
-                    continue
-                try:
-                    open(complete_all, 'wb').write(r.content)
-                except Exception as erro:
-                    print(erro)
-
-                if f'/media/all_images/{filename}' not in lista_imagens_names:
-                    lista_imagens_names.append(f'/media/all_images/{filename}')
+            if complete not in lista_imagens_names:
+                lista_imagens_names.append(complete)
 
         with zipfile.ZipFile(f'{os.path.abspath("media/all_images")}/all_images.zip', 'w') as zipF:
-            for file in lista_imagens:
-                num_jpg = file.find('jpg')
-                num_png = file.find('png')
-                num_gif = file.find('gif')
-                num_svg = file.find('svg')
-                if num_png != -1:
-                    file = file[0: num_png + 3]
-                elif num_jpg != -1:
-                    file = file[0: num_jpg + 3]
-                elif num_gif != -1:
-                    file = file[0: num_gif + 3]
-                elif num_svg != -1:
-                    file = file[0: num_svg + 3]
-                print(file)
+            for file in lista_imagens_names:
                 try:
-                    zipF.write(f"media/all_images/{file.split('/')[-1]}", compress_type=zipfile.ZIP_DEFLATED)
+                    zipF.write(file, compress_type=zipfile.ZIP_DEFLATED)
                 except Exception as erro:
                     print(erro)
                     continue
             zipF.close()
 
-        msg = f'{len(lista_imagens)} Imagens encontradas em {rota}'
-        imagens_total = zip(lista_imagens, lista_imagens_names)
+        msg = f'{len(lista_imagens_names)} Imagens encontradas em {url}'
+        imagens_total = zip(image_list, lista_imagens_names)
         context = {
             'img_total': imagens_total,
             'tudo': '/media/all_images/all_images.zip',
             'msg': msg,
-            'site_status': page,
+            'site_status': url,
         }
         return render(request, 'images/home.html', context)
